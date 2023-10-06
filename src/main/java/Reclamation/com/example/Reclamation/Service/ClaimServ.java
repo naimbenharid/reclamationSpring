@@ -5,6 +5,9 @@ import Reclamation.com.example.Reclamation.Repository.ClaimRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import java.util.Base64;
 import java.util.List;
 
 
@@ -16,10 +19,37 @@ public class ClaimServ {
         this.claimRepo = claimRepo ;
     }
 
-    public Claim addClaim (Claim claim) { return claimRepo.save(claim);}
+
+
     public List<Claim> getAllClaims(){
         return claimRepo.findAll();
     }
+
+    // Méthode pour chiffrer un texte
+    public String Crypte (String message, SecretKey secretKey)
+            throws Exception {
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+        byte[] encryptedBytes = cipher.doFinal(message.getBytes());
+        return Base64.getEncoder().encodeToString(encryptedBytes);
+    }
+
+
+    public Claim addClaim(Claim claim, SecretKey secretKey) throws Exception {
+        String encryptedClaimMsg = Crypte(claim.getClaimMsg(), secretKey);
+        claim.setClaimMsg(encryptedClaimMsg);
+        return claimRepo.save(claim);
+    }
+
+    // Méthode pour déchiffrer un texte
+    public String decrypt(String encryptedMessage, SecretKey secretKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedMessage));
+        return new String(decryptedBytes);
+    }
+
+
 
 
 }
