@@ -24,12 +24,13 @@ public class Claim {
 
 
 
-    @JsonIgnore
   @ManyToOne
-    @JoinColumn(name = "employer_id")
-    private Employer employer;
-    @JsonIgnore
+  @JoinColumn(name = "employer_id")
+  @JsonIgnore
+  private Employer employer;
+
     @ManyToOne
     @JoinColumn(name = "responsible_id")
+    @JsonIgnore
     private Responsible responsible;
 }

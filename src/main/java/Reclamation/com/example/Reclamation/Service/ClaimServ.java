@@ -2,23 +2,27 @@ package Reclamation.com.example.Reclamation.Service;
 
 import Reclamation.com.example.Reclamation.Entity.Claim;
 import Reclamation.com.example.Reclamation.Repository.ClaimRepo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import java.util.Base64;
 import java.util.List;
 
 
 @Service
+@Slf4j
 public class ClaimServ {
     private final ClaimRepo claimRepo ;
+
+    private static final String PASSWORD = "password";
+    private static final String CRYPTING_KEY = "12334567";
+
     @Autowired
      public  ClaimServ (ClaimRepo claimRepo){
         this.claimRepo = claimRepo ;
     }
-
 
 
     public List<Claim> getAllClaims(){
@@ -26,27 +30,23 @@ public class ClaimServ {
     }
 
     // Méthode pour chiffrer un texte
-    public String Crypte (String message, SecretKey secretKey)
-            throws Exception {
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        byte[] encryptedBytes = cipher.doFinal(message.getBytes());
-        return Base64.getEncoder().encodeToString(encryptedBytes);
+    public String encodeMessage(String message) {
+        TextEncryptor encryptor = Encryptors.text(PASSWORD,CRYPTING_KEY);
+        log.info( "encryptor" + encryptor.encrypt(message));
+        return  encryptor.encrypt(message);
     }
 
 
-    public Claim addClaim(Claim claim, SecretKey secretKey) throws Exception {
-        String encryptedClaimMsg = Crypte(claim.getClaimMsg(), secretKey);
+    public Claim addClaim(Claim claim)  {
+        String encryptedClaimMsg = encodeMessage(claim.getClaimMsg());
         claim.setClaimMsg(encryptedClaimMsg);
         return claimRepo.save(claim);
     }
 
     // Méthode pour déchiffrer un texte
-    public String decrypt(String encryptedMessage, SecretKey secretKey) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES");
-        cipher.init(Cipher.DECRYPT_MODE, secretKey);
-        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedMessage));
-        return new String(decryptedBytes);
+    public String decrypt(String encryptedMessage)  {
+        TextEncryptor encryptor = Encryptors.text(PASSWORD,CRYPTING_KEY);
+        return encryptor.decrypt(encryptedMessage);
     }
 
 

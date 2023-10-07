@@ -9,6 +9,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
 @Controller
 @RestController
 @RequestMapping("/claims")
@@ -25,7 +26,7 @@ public class ClaimController {
     private SecretKey generateSecretKey() {
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-            keyGenerator.init(128); // Utilisez la taille de clé souhaitée (128, 256, etc.).
+            keyGenerator.init(128); // taille du clé
             return keyGenerator.generateKey();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -35,17 +36,20 @@ public class ClaimController {
     @PostMapping("/add")
     @ResponseBody
     public Claim addClaim(@RequestBody Claim claim) throws Exception {
-        // Chiffrement du champ claimMsj en utilisant la clé secrète
-        String encryptedClaimMsj = claimServ.Crypte(claim.getClaimMsg(), secretKey);
-        claim.setClaimMsg(encryptedClaimMsj);
-
-        // Enregistrement du claim chiffré dans la base de données
-        return claimServ.addClaim(claim, secretKey);
+        return claimServ.addClaim(claim);
     }
         @GetMapping("/getAll")
-    @ResponseBody
-    public List<Claim> getAllClaims() {
-            return claimServ.getAllClaims();
+        @ResponseBody
+        public List<Claim> getAllClaims() throws Exception {
+            List<Claim> claims = claimServ.getAllClaims();
+            // Déchiffrez les claims pour le responsable
+            for (Claim claim : claims) {
+                String decryptedClaimMsg = claimServ.decrypt(claim.getClaimMsg());
+                claim.setClaimMsg(decryptedClaimMsg);
+            }
+
+            return claims;
         }
-    }
+
+}
 
