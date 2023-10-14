@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 @Controller
 @RestController
-@RequestMapping("/api/responsibles") // L'URL de base pour toutes les requêtes liées aux responsables
+@RequestMapping("/responsible") // L'URL de base pour toutes les requêtes liées aux responsables
 public class ResponsibleController {
 
     private final ResponsibleServ responsibleServ;

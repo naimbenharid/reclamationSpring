@@ -24,7 +24,7 @@ public class EmployerController {
 
     @ResponseBody
     @PostMapping("/signin")
-    public Employer signIn(@RequestParam String name, @RequestParam String password) {
-        return employerServ.signIn(name, password);
+    public Employer signIn(@RequestBody Employer employer) {
+        return employerServ.signIn(employer.getName(), employer.getPassword());
     }
 }
